@@ -1,7 +1,9 @@
 package wechat.pay.service.util;
 
+import com.alibaba.fastjson.JSON;
 import org.apache.logging.log4j.Logger;
 import wechat.pay.service.exception.RequestToMapException;
+import wechat.pay.service.service.WechatService;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -121,13 +123,26 @@ public class CommonUtils {
 	}
 	
 	public static void getRequestInfo(HttpServletRequest request, Logger logger) throws RequestToMapException {
+		Map<String, Object> map = new HashMap<>();
+		String ip = getIpAddr(request);
+		String type = request.getMethod();
+		String url = request.getRequestURL().toString();
+		Map<String, Object> parameterMap = CommonUtils.resquestParameter2Map(request);
+
 		logger.info(
 				"\n------------------------------------------------------------------------------------------" +
-						"\n\t   client IP    : " + getIpAddr(request) +
-						"\n\t   content type : " + request.getMethod() +
-						"\n\t   request url  : " + request.getRequestURL() +
-						"\n\t   parameters   : " + String.format("【%s】", CommonUtils.resquestParameter2Map(request)) +
+						"\n\t   client IP    : " + ip +
+						"\n\t   content type : " + type +
+						"\n\t   request url  : " + url +
+						"\n\t   parameters   : " + String.format("【%s】", parameterMap) +
 						"\n------------------------------------------------------------------------------------------");
+		//将request信息写入数据库
+		map.put("order_id", parameterMap.get("order_id"));
+		map.put("client_ip", ip);
+		map.put("request_type", type);
+		map.put("request_url", url);
+		map.put("request_parameters", JSON.toJSONString(parameterMap));
+		WechatService.sysncAddReqeustLog(map);
 	}
 
 	public static String getIpAddr(HttpServletRequest request) {

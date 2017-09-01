@@ -86,7 +86,9 @@ public class WechatService {
                 CommonUtils.generateMap(resultData, "out_trade_no", data.get("out_trade_no").toString());
                 CommonUtils.generateMap(resultData, "total_fee", data.get("total_fee").toString());
                 CommonUtils.generateMap(resultData, "return_code", data.get("return_code").toString());
-                CommonUtils.generateMap(resultData, "return_msg", data.get("return_msg").toString());
+                if(data.get("return_code") != null && "FAIL".equals(data.get("return_code").toString())){
+                    CommonUtils.generateMap(resultData, "return_msg", data.get("return_msg").toString());
+                }
                 try {
                     WXPayUtil.generateSignature(resultData, WXPayConstants.PAY_STORE_KEY);
                 } catch (Exception e) {
@@ -115,7 +117,7 @@ public class WechatService {
                 CommonUtils.generateMap(resultData, "order_id", data.get("out_trade_no").toString());
                 CommonUtils.generateMap(resultData, "total_fee", data.get("total_fee").toString());
                 CommonUtils.generateMap(resultData, "openid", data.get("openid").toString());
-                CommonUtils.generateMap(resultData, "third_notify_data", JSON.toJSONString(data));
+                CommonUtils.generateMap(resultData, "third_pre_pay_data", JSON.toJSONString(data));
                 if(data.get("attach") != null){
                     logger.trace("attach is null.");
                     Map<String, Object> attachMap = JSON.parseObject(data.get("attach").toString(), Map.class);
@@ -124,9 +126,9 @@ public class WechatService {
                 }
                 try {
                     boolean result = addServerLog(resultData);
-                    logger.trace("向狮吼支付日志写入结果 --> {}.", result);
+                    logger.trace("支付日志写入结果 --> {}.", result);
                 } catch (DatabaseException e) {
-                    logger.trace("向狮吼支付日志写入失败.");
+                    logger.trace("支付日志写入失败.");
                     e.printStackTrace();
                 }
             }
@@ -155,7 +157,7 @@ public class WechatService {
      */
     private static boolean addServerLog(Map<String, Object> data) throws DatabaseException {
         try(Connection conn = DBUtil.getConnection()){
-            PreparedStatement pstmt = conn.prepareStatement("INSERT INTO pay_server_log (id, order_id, third_order_id, third_platform, total_fee, description, openid, third_notify_data, create_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            PreparedStatement pstmt = conn.prepareStatement("INSERT INTO pay_server_log (id, order_id, third_order_id, third_platform, total_fee, description, openid, third_pre_pay_data) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
             int idx = 1;
             pstmt.setString(idx++, WXPayUtil.generateOrderId());
             pstmt.setString(idx++, data.get("order_id").toString());
@@ -164,8 +166,7 @@ public class WechatService {
             pstmt.setString(idx++, data.get("total_fee").toString());
             pstmt.setString(idx++, data.get("description").toString());
             pstmt.setString(idx++, data.get("openid").toString());
-            pstmt.setString(idx++, data.get("third_notify_data").toString());
-            pstmt.setLong(idx++, System.currentTimeMillis());
+            pstmt.setString(idx++, data.get("third_pre_pay_data").toString());
             int result = pstmt.executeUpdate();
             conn.commit();
             return result > 0;
@@ -173,6 +174,55 @@ public class WechatService {
             throw new DatabaseException(e);
         }
 
+    }
+
+
+    /**
+     * 异步添加请求日志
+     * @param
+     * @return
+     * @author lichenyi
+     * @date 2017-9-1 0001 15:43
+     */
+    public static boolean sysncAddReqeustLog(Map<String, Object> data){
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    boolean result = addReqeustLog(data);
+                    logger.trace("添加请求日志结果 -- {}", result);
+                } catch (DatabaseException e) {
+                    logger.error("添加请求日志异常");
+                    e.printStackTrace();
+                }
+            }
+        }, "添加请求日志线程");
+        thread.start();
+        return false;
+    }
+
+    /**
+     * 添加请求日志
+     * @param
+     * @return
+     * @author lichenyi
+     * @date 2017-9-1 0001 15:43
+     */
+    public static boolean addReqeustLog(Map<String, Object> data) throws DatabaseException {
+        try(Connection conn = DBUtil.getConnection()){
+            PreparedStatement pstmt = conn.prepareStatement("INSERT INTO request_log (order_id, client_ip, request_type, request_url, request_parameters) VALUES (?, ?, ?, ?, ?)");
+            int idx = 1;
+            pstmt.setString(idx++, data.get("order_id").toString());
+            pstmt.setString(idx++, data.get("client_ip").toString());
+            pstmt.setString(idx++, data.get("request_type").toString());
+            pstmt.setString(idx++, data.get("request_url").toString());
+            pstmt.setString(idx++, data.get("request_parameters").toString());
+            int result = pstmt.executeUpdate();
+            conn.commit();
+            return result > 0;
+        }catch(SQLException e){
+            throw new DatabaseException(e);
+        }
     }
 
 }
