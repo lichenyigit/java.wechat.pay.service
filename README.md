@@ -9,7 +9,7 @@ CREATE TABLE `pay_server_log` (
   `third_platform` varchar(32) NOT NULL COMMENT '第三方支付平台名称',
   `total_fee` decimal(10,2) NOT NULL COMMENT '总支付金额',
   `description` text COMMENT '系统调用此服务的描述',
-  `openid` varchar(100) DEFAULT NULL COMMENT '微信用户的open id（仅微信用户会有）',
+  `openid` varchar(100) DEFAULT NULL COMMENT '微信用户的open id（仅微信用户会有）', 
   `third_pre_pay_data` text COMMENT '第三方预支付订单信息',
   `third_notify_data` text COMMENT '第三方支付返回的字符串',
   `create_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '创建时间（此条数据创建的时间）',
