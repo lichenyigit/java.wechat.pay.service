@@ -1,0 +1,23 @@
+<configuration status="WARN">
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %L %-5level %logger{36} - %m%n"/>
+        </Console>
+        <RollingFile name="RollingFile" fileName="${sys:catalina.base}/logs/wechat.pay.service.log" filePattern="${sys:catalina.base}/logs/$${date:yyyy-MM}/wechat.pay.service-%d{MM-dd-yyyy}-%i.log">
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %L %logger{36} - %m%n"/>
+            <Policies>
+                <CronTriggeringPolicy schedule="0 0 0 * * ?"/>
+            </Policies>
+        </RollingFile>
+    </Appenders>
+    <Loggers>
+        <Logger name="wechat.pay.service" level="TRACE" additivity="false">
+            <AppenderRef ref="Console" />
+            <AppenderRef ref="RollingFile" />
+        </Logger>
+        <Root level="TRACE">
+            <AppenderRef ref="Console" />
+            <AppenderRef ref="RollingFile" />
+        </Root>
+    </Loggers>
+</configuration>

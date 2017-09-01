@@ -1,0 +1,15 @@
+<Context>
+    <!-- 狮吼支付服务 -->
+    <!-- 连接池设置 -->
+    <Environment name="jdbc/shihou/service/pay/properties/username" type="java.lang.String" value="username"/>
+    <Environment name="jdbc/shihou/service/pay/properties/password" type="java.lang.String" value="password"/>
+    <Environment name="jdbc/shihou/service/pay/properties/url" type="java.lang.String" value="jdbc:mysql://databaseip:3306/shihou_pay_server"/>
+    <Environment name="jdbc/shihou/service/pay/properties/driverClassName" type="java.lang.String" value="com.mysql.jdbc.Driver"/>
+    <Environment name="jdbc/shihou/service/pay/properties/defaultAutoCommit" type="java.lang.String" value="false"/>
+    <Environment name="jdbc/shihou/service/pay/properties/rollbackOnReturn" type="java.lang.String" value="true"/><!-- 如果不是默认提交，则归还连接时默认执行rollback！ -->
+    <Environment name="jdbc/shihou/service/pay/properties/validationQuery" type="java.lang.String" value="SELECT 1"/>
+    <Environment name="jdbc/shihou/service/pay/properties/maxIdle" type="java.lang.String" value="10"/>
+    <Environment name="jdbc/shihou/service/pay/properties/maxTotal" type="java.lang.String" value="10"/>
+    <Environment name="jdbc/shihou/service/pay/properties/maxWaitMillis" type="java.lang.String" value="1000"/>
+    <Environment name="jdbc/shihou/service/pay/properties/testWhileIdle" type="java.lang.String" value="true"/>
+</Context>
